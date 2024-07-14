@@ -32,7 +32,7 @@ app.post('/addNewUser', async (req, res) => {
         try {
             const query = await supabase.from('Police').insert([{ name: name, badge: badge, uid: uid }]).select('id')
             if (!query.error) {
-                return res.json({ msg: "Successful", data: "Police id:" + query.data[0].id });
+                return res.json({ msg: "Successful", data: "Police id:" + query.data[0].id }).status(200);
             }
             return res.json({ msg: "unSuccessful", error: query.error }).status(400);
         } catch (e) {
