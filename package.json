@@ -1,0 +1,23 @@
+{
+  "name": "jailrecord-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Somnathumapathi/jailrecord-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Somnathumapathi/jailrecord-backend/issues"
+  },
+  "homepage": "https://github.com/Somnathumapathi/jailrecord-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.44.3",
+    "express": "^4.19.2"
+  }
+}
