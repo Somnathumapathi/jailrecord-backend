@@ -8,7 +8,7 @@ app.use(express.json())
 
 app.get('/', (req, res) => {
     res.status(200);
-    res.send("Nakkan eno nindu lowde ke ball");
+    res.send("Successful : 6106");
 });
 
 app.post('/addNewUser', async (req, res) => {
@@ -116,7 +116,7 @@ app.patch("/updateCaseStatus", async (req, res) => {
 
 app.get("/getAllCases", async (req, res) => {
     try {
-        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*)');
+        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(name)');
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
@@ -129,7 +129,7 @@ app.get("/getAllCases", async (req, res) => {
 app.get("/getLawyersCases", async (req, res) => {
     const { lawyer_id } = req.query;
     try {
-        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*)').eq("lawyer_id", lawyer_id);
+        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(name)').eq("lawyer_id", lawyer_id);
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
@@ -141,7 +141,7 @@ app.get("/getLawyersCases", async (req, res) => {
 app.get("/getPolicesCases", async (req, res) => {
     const { police_id } = req.query;
     try {
-        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*)').eq("police_id", police_id);
+        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(name)').eq("police_id", police_id);
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
