@@ -67,7 +67,7 @@ app.post("/createCase", async (req, res) => {
     if (!lawyer_id)
         lawyer_id = null
     try {
-        const query = await supabase.from('Case').insert({ prisoner_id: prisoner_id, lawyer_id: lawyer_id, court_id: court_id, documents: documents, police_id: police_id }).select('id');
+        const query = await supabase.from('Case').insert({ prisoner_id: prisoner_id, lawyer_id: lawyer_id || null, court_id: court_id, documents: documents || null, police_id: police_id }).select('id');
         const { data, error } = query;
         if (error) {
             return res.json({ msg: "unsuccessful", error: error }).status(400);
