@@ -70,7 +70,9 @@ app.post("/createCase", async (req, res) => {
     if (!lawyer_id)
         lawyer_id = null
     try {
-        const query = await supabase.from('Case').insert({ prisoner_id: prisoner_id, lawyer_id: lawyer_id || null, court_id: court_id, documents: documents || null, police_id: police_id }).select('id');
+        // const q = await supabase.from('Hearing').insert({verdict})
+        const query = await supabase.from('Case').insert({ prisoner_id: prisoner_id, lawyer_id: lawyer_id || null, court_id: court_id, documents: documents || null, police_id: police_id , closed: false}).select('id');
+        
         const { data, error } = query;
         if (error) {
             return res.json({ msg: "unsuccessful", error: error }).status(400);
@@ -101,26 +103,57 @@ app.patch("/joinCase", async (req, res) => {
 })
 
 app.patch("/updateCaseStatus", async (req, res) => {
-    const { case_id, status } = await req.body;
-    if (!case_id || !status) {
-        return res.status(400).json({ msg: "something went wrong" })
-    }
-    console.log("updating case status")
+    const { case_id, status, isImprisoned } = await req.body;
+    
+    console.log("updating case status");
     try {
-        const query = await supabase.from('Hearing').update({ verdict: status }).eq('id', case_id).select();
-        const { data, error } = query;
-        if (error) {
-            return res.json({ msg: "unsuccessful", error: error }).status(400);
+        const { data: caseData, error: caseError } = await supabase
+            .from('Case')
+            .select('prisoner_id')
+            .eq('id', case_id)
+            .single();
+        
+        if (caseError) {
+            return res.status(400).json({ msg: "unsuccessful", error: caseError });
         }
-        return res.json({ msg: "Successful", data: data }).status(200);
+
+        const prisoner_id = caseData.prisoner_id;
+
+       
+        const { data: caseUpdateData, error: caseUpdateError } = await supabase
+            .from('Case')
+            .update({ closed: status })
+            .eq('id', case_id)
+            .select();
+        
+        if (caseUpdateError) {
+            return res.status(400).json({ msg: "unsuccessful", error: caseUpdateError });
+        }
+
+        
+        const { data: prisonerUpdateData, error: prisonerUpdateError } = await supabase
+            .from('Prisoners')
+            .update({ status: isImprisoned })
+            .eq('id', prisoner_id)
+            .select();
+        
+        if (prisonerUpdateError) {
+            return res.status(400).json({ msg: "unsuccessful", error: prisonerUpdateError });
+        }
+
+        return res.status(200).json({ msg: "Successful", caseData: caseUpdateData, prisonerData: prisonerUpdateData });
     } catch (e) {
-        return res.json({ error: e }).status(500)
+        return res.status(500).json({ error: e });
     }
-})
+});
+
+// app.patch("/prisonerStatus", async (req, res) => {
+
+// })
 
 app.get("/getAllCases", async (req, res) => {
     try {
-        const query = await supabase.from('Case').select('id, documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*)');
+        const query = await supabase.from('Case').select('id, documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*), closed');
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
@@ -133,7 +166,7 @@ app.get("/getAllCases", async (req, res) => {
 app.get("/getLawyersCases", async (req, res) => {
     const { lawyer_id } = req.query;
     try {
-        const query = await supabase.from('Case').select('id, documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*)').eq("lawyer_id", lawyer_id);
+        const query = await supabase.from('Case').select('id, documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*), closed').eq("lawyer_id", lawyer_id);
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
@@ -145,7 +178,7 @@ app.get("/getLawyersCases", async (req, res) => {
 app.get("/getPolicesCases", async (req, res) => {
     const { police_id } = req.query;
     try {
-        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*)').eq("police_id", police_id);
+        const query = await supabase.from('Case').select('documents, Prisoners(*), Court(*), Police(*), Lawyer(*), Jail(*), closed').eq("police_id", police_id);
         if (!query.error) {
             return res.json({ msg: "Successful", data: query.data }).status(200);
         }
