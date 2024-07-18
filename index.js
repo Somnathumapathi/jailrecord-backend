@@ -167,6 +167,19 @@ app.post("/addPrisoner", async (req,res)=> {
     }
 })
 
+app.post("/joinCase", async (req,res)=>{
+    const { caseId, lawyerId } = req.body
+    try {
+        const query = await supabase.from('Cases').update({lawyer_id: lawyerId}).eq('id', caseId).select()
+        if (error) {
+            return res.json({ msg: "unsuccessful", error: error }).status(400);
+        }
+        return res.json({ msg: "Successful", data: data }).status(200);
+        } catch (e) {
+        return res.json({ error: e }).status(500)
+    }
+})
+
 app.listen(PORT, (error) => {
     if (!error) {
         console.log("http://localhost:" + PORT)
